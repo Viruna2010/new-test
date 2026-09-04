@@ -6,7 +6,7 @@
   <title>VIRU Radio - Live Broadcast</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -22,162 +22,147 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      cursor: pointer;
       position: relative;
     }
 
-    /* 1. 100% Full-Screen YouTube Video Stage */
-    .video-background {
-      position: absolute;
-      top: 0;
-      left: 0;
+    /* 1. True 100% Full-Screen Video (Crops YouTube Title Bar & Black Bars) */
+    .video-viewport {
+      position: fixed;
+      top: 50%;
+      left: 50%;
       width: 100vw;
       height: 100vh;
-      z-index: 1;
+      transform: translate(-50%, -50%);
       overflow: hidden;
-    }
-
-    .video-background iframe {
-      width: 100vw;
-      height: 100vh;
-      border: none;
+      z-index: 1;
       pointer-events: none;
-      transform: scale(1.06); /* Stretches to eliminate any black letterboxes */
     }
 
-    /* Subtle Cinematic Vignette */
-    .screen-overlay {
+    .video-viewport iframe {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
-      background: radial-gradient(circle, transparent 65%, rgba(0, 0, 0, 0.45) 100%);
-      pointer-events: none;
+      top: 50%;
+      left: 50%;
+      /* 16:9 ratio guarantee across all screens */
+      width: 100vw;
+      height: 56.25vw;
+      min-height: 100vh;
+      min-width: 177.78vh;
+      /* 1.25 Zoom removes both side black bars and pushes YouTube title outside screen */
+      transform: translate(-50%, -50%) scale(1.25);
+      border: none;
     }
 
-    /* 2. Top Right: VIRU Radio Brand with Smooth Floating Animation */
-    .radio-brand {
+    /* 2. Top Right: Solid TV Channel Watermark */
+    .tv-logo-bug {
       position: absolute;
       top: 25px;
       right: 35px;
       z-index: 10;
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: rgba(15, 23, 42, 0.85);
-      padding: 10px 22px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(12px);
-      /* Smooth gentle swaying animation */
-      animation: floatBrand 4s ease-in-out infinite alternate;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
     }
 
-    @keyframes floatBrand {
-      0% { transform: translateY(0px) translateX(0px); }
-      50% { transform: translateY(-4px) translateX(-6px); }
-      100% { transform: translateY(2px) translateX(4px); }
-    }
-
-    .radio-logo {
+    .tv-logo-name {
       font-weight: 900;
-      font-size: 22px;
+      font-size: 20px;
       letter-spacing: 1.5px;
-      background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     }
 
-    .live-indicator {
+    .tv-live-badge {
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: #e11d48;
+      gap: 5px;
+      background: #dc2626;
       color: #fff;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 6px;
-      letter-spacing: 1.2px;
-    }
-
-    .live-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #fff;
-      animation: blink 1.2s infinite ease-in-out;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.3; transform: scale(0.8); }
-    }
-
-    /* 3. Bottom Right: Small TV Style Clock */
-    .tv-clock-box {
-      position: absolute;
-      bottom: 50px;
-      right: 35px;
-      z-index: 10;
-      background: rgba(15, 23, 42, 0.85);
-      padding: 7px 16px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-      text-align: right;
-    }
-
-    .tv-clock {
-      font-family: 'Orbitron', monospace;
-      font-size: 20px;
-      font-weight: 800;
-      color: #38bdf8;
+      font-size: 10.5px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 4px;
       letter-spacing: 1px;
-      line-height: 1.1;
     }
 
-    .tv-date {
-      font-size: 10px;
-      font-weight: 600;
-      color: #94a3b8;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
+    .live-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ffffff;
+      animation: livePulse 1s infinite alternate;
     }
 
-    /* 4. Bottom Full-Width Ticker Bar */
-    .ticker-bar {
+    @keyframes livePulse {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.3; transform: scale(0.8); }
+    }
+
+    /* 3. Bottom Right: Small White TV Clock (No Date) */
+    .tv-clock-bug {
+      position: absolute;
+      bottom: 45px;
+      right: 30px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+    }
+
+    .tv-clock-time {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff; /* Real TV style clean white */
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+
+    /* 4. Bottom News Ticker Bar */
+    .ticker-container {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 38px;
-      background: rgba(10, 15, 29, 0.95);
+      height: 36px;
+      background: rgba(6, 10, 20, 0.95);
       z-index: 10;
       display: flex;
       align-items: center;
-      border-top: 2px solid #38bdf8;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
+      border-top: 2px solid #dc2626;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.9);
     }
 
-    .ticker-badge {
-      background: #38bdf8;
-      color: #090d16;
+    .on-air-badge {
+      background: #dc2626;
+      color: #ffffff;
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 900;
       padding: 0 16px;
       height: 100%;
       display: flex;
       align-items: center;
-      letter-spacing: 1.2px;
+      gap: 6px;
+      letter-spacing: 1.5px;
       flex-shrink: 0;
+      box-shadow: 4px 0 12px rgba(220, 38, 38, 0.4);
       z-index: 2;
+    }
+
+    .on-air-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: livePulse 1s infinite alternate;
     }
 
     .ticker-viewport {
@@ -190,14 +175,14 @@
     .ticker-content {
       display: inline-block;
       padding-left: 100%;
-      animation: tickerMarquee 38s linear infinite;
+      animation: tickerScroll 36s linear infinite;
       font-size: 12.5px;
       font-weight: 600;
       color: #f1f5f9;
       letter-spacing: 0.8px;
     }
 
-    @keyframes tickerMarquee {
+    @keyframes tickerScroll {
       0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
@@ -207,66 +192,57 @@
       margin-right: 45px;
     }
 
-    .ticker-highlight {
-      color: #38bdf8;
-      font-weight: 700;
-    }
-
-    .ticker-power {
-      color: #c084fc;
-      font-weight: 700;
-    }
+    .highlight-red { color: #f87171; font-weight: 700; }
+    .highlight-blue { color: #38bdf8; font-weight: 700; }
+    .highlight-brand { color: #a855f7; font-weight: 800; }
   </style>
 </head>
 <body onclick="unmuteFallback()">
 
-  <!-- 1. Full Screen Video Stage -->
-  <div class="video-background">
+  <!-- 1. Full-Screen Edge-to-Edge Video (No Black Bars, No YouTube Title) -->
+  <div class="video-viewport">
     <iframe 
       id="yt-video"
-      src="https://www.youtube.com/embed/egoeUY0PocE?autoplay=1&mute=0&loop=1&playlist=egoeUY0PocE&enablejsapi=1&controls=0&modestbranding=1&rel=0"
+      src="https://www.youtube.com/embed/egoeUY0PocE?autoplay=1&mute=0&loop=1&playlist=egoeUY0PocE&enablejsapi=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3"
       allow="autoplay; encrypted-media">
     </iframe>
   </div>
 
-  <!-- Screen Vignette -->
-  <div class="screen-overlay"></div>
-
-  <!-- 2. Top Right: Animated Floating Brand -->
-  <div class="radio-brand">
-    <div class="radio-logo">VIRU Radio</div>
-    <div class="live-indicator">
-      <div class="live-dot"></div>
+  <!-- 2. Top Right: Solid TV Channel Watermark -->
+  <div class="tv-logo-bug">
+    <div class="tv-logo-name">VIRU Radio</div>
+    <div class="tv-live-badge">
+      <div class="live-pulse-dot"></div>
       LIVE
     </div>
   </div>
 
-  <!-- 3. Bottom Right: Compact TV Style SLST Clock -->
-  <div class="tv-clock-box">
-    <div class="tv-clock" id="clock">00:00:00</div>
-    <div class="tv-date" id="date">SLST</div>
+  <!-- 3. Bottom Right: Small White TV Time (No Date) -->
+  <div class="tv-clock-bug">
+    <div class="tv-clock-time" id="clock">00:00:00 PM</div>
   </div>
 
-  <!-- 4. Bottom News Ticker Bar in English -->
-  <div class="ticker-bar">
-    <div class="ticker-badge">LIVE ON AIR</div>
+  <!-- 4. Bottom Broadcast Bar with Beautiful ON AIR Badge -->
+  <div class="ticker-container">
+    <div class="on-air-badge">
+      <div class="on-air-dot"></div>
+      ON AIR
+    </div>
     <div class="ticker-viewport">
       <div class="ticker-content">
-        <span class="ticker-item">★ WELCOME TO <span class="ticker-highlight">VIRU RADIO</span> 24/7 LIVE STREAM</span>
-        <span class="ticker-item">★ STAY WITH US FOR THE ULTIMATE NON-STOP MUSICAL EXPERIENCE</span>
-        <span class="ticker-item">★ PLEASE NOTE: THIS IS CURRENTLY A LIVE TEST BROADCAST</span>
-        <span class="ticker-item">★ STREAMING HIGH QUALITY VIDEO & AUDIO LIVE FROM SRI LANKA (SLST)</span>
-        <span class="ticker-item">★ <span class="ticker-power">POWERED BY VIRU BEATZ</span> — ALL RIGHTS RESERVED</span>
-        <span class="ticker-item">★ THANK YOU FOR TUNING IN • ENJOY THE VIBES!</span>
+        <span class="ticker-item">★ WELCOME TO <span class="highlight-blue">VIRU RADIO LIVE</span> 24/7 BROADCAST</span>
+        <span class="ticker-item">★ <span class="highlight-red">STAY WITH US</span> — THIS IS CURRENTLY A LIVE TEST STREAM</span>
+        <span class="ticker-item">★ STREAMING HIGH FIDELITY NON-STOP MUSIC & VISUALS</span>
+        <span class="ticker-item">★ <span class="highlight-brand">POWERED BY VIRU BEATZ</span> — ALL RIGHTS RESERVED</span>
+        <span class="ticker-item">★ ENJOY THE RHYTHM & THANK YOU FOR WATCHING!</span>
       </div>
     </div>
   </div>
 
   <script>
-    // 1. Exact Sri Lanka Standard Time (Asia/Colombo UTC+5:30)
+    // Exact Sri Lanka Time (SLST Asia/Colombo) - Time Only
     function updateClock() {
       const now = new Date();
-      
       const timeStr = now.toLocaleTimeString('en-US', {
         timeZone: 'Asia/Colombo',
         hour12: true,
@@ -274,22 +250,13 @@
         minute: '2-digit',
         second: '2-digit'
       });
-
       document.getElementById('clock').innerText = timeStr;
-
-      const dateStr = now.toLocaleDateString('en-GB', {
-        timeZone: 'Asia/Colombo',
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-      document.getElementById('date').innerText = dateStr + " • SLST";
     }
 
     setInterval(updateClock, 250);
     updateClock();
 
-    // 2. Unmute Fallback
+    // Fallback unmute
     function unmuteFallback() {
       const iframe = document.getElementById('yt-video');
       if (iframe && iframe.contentWindow) {

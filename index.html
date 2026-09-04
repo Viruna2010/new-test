@@ -19,7 +19,7 @@
       position: relative;
     }
 
-    /* 1. Fast Full-Screen Video */
+    /* 1. Fast, Lag-Free Full-Screen Video */
     .video-viewport {
       position: fixed;
       top: 0;
@@ -37,7 +37,7 @@
       border: none;
     }
 
-    /* 2. Top Right: TV Logo Bug */
+    /* 2. Top Right: TV Bug */
     .tv-channel-bug {
       position: absolute;
       top: 25px;
@@ -166,7 +166,7 @@
     .highlight-brand { color: #c084fc; font-weight: 800; }
 
     /* =========================================================
-       ADMIN DRAWER (Triggered by 'A' Key)
+       ADMIN DRAWER (Press 'A')
        ========================================================= */
     #admin-overlay {
       position: fixed;
@@ -326,7 +326,7 @@
     </div>
   </div>
 
-  <!-- PASSWORD DIALOG (Triggered by 'A' Key) -->
+  <!-- PASSWORD DIALOG (Press 'A') -->
   <div id="pw-dialog">
     <div class="pw-card">
       <h3 style="font-size: 16px; margin-bottom: 10px; color: #38bdf8;">Admin Access</h3>
@@ -350,9 +350,9 @@
 
       <!-- PLAYBACK CONTROLS -->
       <div class="control-box">
-        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE BROADCAST CONTROLS</div>
+        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE PLAYBACK CONTROLS</div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-action" id="btn-pause-play" style="background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause()">⏸ Pause Video & Audio</button>
+          <button class="btn-action" id="btn-pause-play" style="background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause()">⏸ Pause Video</button>
           <button class="btn-action" style="background: #6366f1; color: #fff; font-weight: 800;" onclick="skipNextSong()">⏭ Next Song</button>
         </div>
       </div>
@@ -394,7 +394,7 @@
     let player = null;
     let isPaused = false;
 
-    // 1. Clock (Asia/Colombo SLST)
+    // 1. Clock (Lag-Free 1000ms update)
     function updateClock() {
       const now = new Date();
       document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {
@@ -408,25 +408,18 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 2. Secret 'A' Key Handler (Fix: e.preventDefault stops 'A' from being typed into box)
+    // 2. Secret 'A' Key Handler
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT') return;
       if (e.key === 'a' || e.key === 'A') {
-        e.preventDefault(); // Prevents 'a' character from entering the password input!
         openPasswordDialog();
       }
     });
 
     function openPasswordDialog() {
-      const dialog = document.getElementById('pw-dialog');
-      const passInput = document.getElementById('admin-pass-input');
-      dialog.style.display = 'flex';
-      passInput.value = '';
-      document.getElementById('pw-err').innerText = '';
-      setTimeout(() => {
-        passInput.value = '';
-        passInput.focus();
-      }, 50);
+      document.getElementById('pw-dialog').style.display = 'flex';
+      document.getElementById('admin-pass-input').value = '';
+      document.getElementById('admin-pass-input').focus();
     }
 
     function closePasswordDialog() {
@@ -456,54 +449,37 @@
       document.getElementById('admin-overlay').style.display = 'none';
     }
 
-    // 3. Guaranteed Playback Controls (Pauses & Mutes both Audio & Video)
+    // 3. Instant Pause / Resume Controls
     function togglePlayPause() {
       const btn = document.getElementById('btn-pause-play');
+      const iframe = document.querySelector('#yt-player');
 
       if (!isPaused) {
-        // STOP AUDIO & VIDEO
-        if (player) {
-          try { player.pauseVideo(); } catch (e) {}
-          try { player.mute(); } catch (e) {}
+        if (player && typeof player.pauseVideo === 'function') {
+          player.pauseVideo();
         }
-        // Send postMessage to all iframe windows to guarantee pause
-        document.querySelectorAll('iframe').forEach(f => {
-          try {
-            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
-            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'mute', args: [] }), '*');
-          } catch (e) {}
-        });
-
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        }
         isPaused = true;
-        btn.innerText = '▶ Resume Playback';
+        btn.innerText = '▶ Resume Video';
         btn.style.background = '#16a34a';
         btn.style.color = '#fff';
       } else {
-        // RESUME AUDIO & VIDEO
-        if (player) {
-          try { player.unMute(); } catch (e) {}
-          try { player.playVideo(); } catch (e) {}
+        if (player && typeof player.playVideo === 'function') {
+          player.playVideo();
         }
-        document.querySelectorAll('iframe').forEach(f => {
-          try {
-            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*');
-            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
-          } catch (e) {}
-        });
-
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        }
         isPaused = false;
-        btn.innerText = '⏸ Pause Video & Audio';
+        btn.innerText = '⏸ Pause Video';
         btn.style.background = '#eab308';
         btn.style.color = '#000';
       }
     }
 
     function skipNextSong() {
-      isPaused = false;
-      const btn = document.getElementById('btn-pause-play');
-      btn.innerText = '⏸ Pause Video & Audio';
-      btn.style.background = '#eab308';
-      btn.style.color = '#000';
       playNext();
     }
 
@@ -547,7 +523,7 @@
       }
     }
 
-    // 5. Robust YouTube Link Extractor
+    // 5. 100% Robust YouTube Link Extractor (Zero-Regex String Search)
     function extractID(url) {
       if (!url) return '';
       url = String(url).trim();
@@ -641,10 +617,7 @@
           'playsinline': 1
         },
         events: {
-          'onReady': (e) => {
-            player = e.target;
-            e.target.playVideo();
-          },
+          'onReady': (e) => e.target.playVideo(),
           'onStateChange': onPlayerStateChange
         }
       });

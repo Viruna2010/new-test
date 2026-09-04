@@ -219,6 +219,14 @@
     .close-btn { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; font-weight: bold; }
     .close-btn:hover { color: #fff; }
 
+    .control-box {
+      background: #1e293b;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      margin-bottom: 18px;
+    }
+
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
     .form-group input {
@@ -351,22 +359,31 @@
   <div id="admin-overlay">
     <div class="admin-card">
       <div class="admin-header">
-        <h2>🔥 VIRU RADIO • FIREBASE PLAYLIST ADMIN</h2>
+        <h2>🔥 VIRU RADIO • ADMIN PANEL</h2>
         <button class="close-btn" onclick="closeAdmin()">✕</button>
+      </div>
+
+      <!-- LIVE PLAYBACK CONTROLS -->
+      <div class="control-box">
+        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE BROADCAST CONTROLS</div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-action" id="btn-pause-play" style="background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause()">⏸ Pause Video</button>
+          <button class="btn-action" style="background: #6366f1; color: #fff; font-weight: 800;" onclick="skipNextSong()">⏭ Next Song</button>
+        </div>
       </div>
 
       <div class="form-group">
         <label>YouTube Video Link or ID:</label>
-        <input type="text" id="add-yt" placeholder="https://youtu.be/... or Video ID">
+        <input type="text" id="add-yt" placeholder="Paste YouTube link here...">
       </div>
       <div style="display: flex; gap: 8px;">
         <div class="form-group" style="flex:1;">
           <label>Song Title:</label>
-          <input type="text" id="add-title" placeholder="e.g. Meedumen Wasi">
+          <input type="text" id="add-title" placeholder="e.g. Song Name">
         </div>
         <div class="form-group" style="flex:1;">
           <label>Artist:</label>
-          <input type="text" id="add-artist" placeholder="e.g. VIRU Beatz">
+          <input type="text" id="add-artist" placeholder="e.g. Artist / Channel">
         </div>
       </div>
       <button class="btn-action" onclick="addSong()">+ Add to Queue</button>
@@ -383,12 +400,12 @@
 
   <script>
     // =========================================================
-    // CONFIGURATION (Configured with your Firebase Database)
+    // CONFIGURATION
     // =========================================================
-    const ADMIN_PASSWORD = "viru"; // ඔබේ Admin Password එක
+    const ADMIN_PASSWORD = "viru";
     const FIREBASE_URL = "https://radio-caf5e-default-rtdb.firebaseio.com/playlist.json";
 
-    // Default Fallback Playlist
+    // Default Fallback
     let playlist = [
       { id: "egoeUY0PocE", title: "Meedumen Wasi", artist: "VIRU Beatz" }
     ];
@@ -450,7 +467,30 @@
       document.getElementById('admin-overlay').style.display = 'none';
     }
 
-    // 3. Firebase REST API Engine
+    // 3. Playback Controls (Pause / Resume / Next)
+    function togglePlayPause() {
+      if (!player || typeof player.getPlayerState !== 'function') return;
+      const state = player.getPlayerState();
+      const btn = document.getElementById('btn-pause-play');
+
+      if (state === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+        btn.innerText = '▶ Resume Video';
+        btn.style.background = '#16a34a';
+        btn.style.color = '#fff';
+      } else {
+        player.playVideo();
+        btn.innerText = '⏸ Pause Video';
+        btn.style.background = '#eab308';
+        btn.style.color = '#000';
+      }
+    }
+
+    function skipNextSong() {
+      playNext();
+    }
+
+    // 4. Firebase REST API Engine
     async function loadFromFirebase() {
       try {
         const res = await fetch(FIREBASE_URL);
@@ -490,17 +530,31 @@
       }
     }
 
-    // 4. Robust YouTube Link & ID Extractor (Fix for all link types)
+    // 5. Bulletproof YouTube ID Extractor (Zero-regex split parser)
     function extractID(url) {
       if (!url) return '';
       url = url.trim();
-      // If directly an 11-char ID
-      if (/^[\w-]{11}$/.test(url)) return url;
 
-      // Handles: youtu.be, watch?v=, embed/, live/, shorts/ with any query parameters
-      const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|live\/|shorts\/))([\w-]{11})/;
-      const match = url.match(regExp);
-      return (match && match) ? match : '';
+      // Handles youtu.be/xxxx links
+      if (url.includes('youtu.be/')) {
+        return url.split('youtu.be/').split('?')[0].split('&')[0].substring(0, 11);
+      }
+      // Handles youtube.com/watch?v=xxxx links
+      if (url.includes('v=')) {
+        return url.split('v=').split('&')[0].substring(0, 11);
+      }
+      // Handles embed/, shorts/, live/
+      if (url.includes('embed/')) {
+        return url.split('embed/').split('?')[0].substring(0, 11);
+      }
+      if (url.includes('shorts/')) {
+        return url.split('shorts/').split('?')[0].substring(0, 11);
+      }
+      if (url.includes('live/')) {
+        return url.split('live/').split('?')[0].substring(0, 11);
+      }
+      // If already a raw 11-char ID
+      return url.substring(0, 11);
     }
 
     function addSong() {
@@ -547,7 +601,7 @@
       });
     }
 
-    // 5. YouTube Player Engine (Auto-Advance & Infinite Loop)
+    // 6. YouTube Player Engine (Auto-Advance & Loop)
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);

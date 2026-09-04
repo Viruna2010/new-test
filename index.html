@@ -6,7 +6,7 @@
   <title>VIRU Radio - Live Broadcast</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Montserrat:wght@700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -25,127 +25,143 @@
       position: relative;
     }
 
-    /* 1. Full-Screen Video (No side cropping, slight top offset hides YouTube title) */
+    /* 1. Perfect 16:9 Full-Screen Video (No black bars & no heavy crop) */
     .video-viewport {
-      position: absolute;
-      top: -35px; /* Pushes top title bar slightly outside the screen */
-      left: 0;
+      position: fixed;
+      top: 50%;
+      left: 50%;
       width: 100vw;
-      height: calc(100vh + 35px);
+      height: 100vh;
+      transform: translate(-50%, -50%);
       overflow: hidden;
       z-index: 1;
       pointer-events: none;
     }
 
     .video-viewport iframe {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vw;
+      height: 56.25vw;
+      min-height: 100vh;
+      min-width: 177.78vh;
+      /* 1.08 zoom crops black edges & title, but keeps 95% width so sides are NOT cut */
+      transform: translate(-50%, -50%) scale(1.08);
       border: none;
     }
 
-    /* 2. Top Right: Solid TV Channel Logo */
-    .tv-logo-bug {
+    /* 2. Top Right: Real TV Broadcast Watermark Bug */
+    .tv-channel-bug {
       position: absolute;
       top: 25px;
-      right: 30px;
-      z-index: 10;
+      right: 35px;
+      z-index: 20;
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(0, 0, 0, 0.65);
-      padding: 6px 16px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
     }
 
-    .tv-logo-name {
-      font-weight: 900;
-      font-size: 20px;
-      letter-spacing: 1.5px;
-      color: #ffffff;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-    }
-
-    .tv-live-badge {
+    .brand-section {
+      padding: 6px 14px;
       display: flex;
       align-items: center;
-      gap: 5px;
-      background: #dc2626;
-      color: #fff;
-      font-size: 10.5px;
+      gap: 6px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .brand-viru {
       font-weight: 900;
-      padding: 3px 8px;
-      border-radius: 4px;
+      font-size: 21px;
+      letter-spacing: 2px;
+      color: #38bdf8;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+    }
+
+    .brand-radio {
+      font-weight: 800;
+      font-size: 15px;
       letter-spacing: 1px;
+      color: #ffffff;
+      opacity: 0.95;
     }
 
-    .live-pulse-dot {
-      width: 6px;
-      height: 6px;
+    .live-section {
+      background: #e11d48;
+      color: #ffffff;
+      font-size: 11.5px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #ffffff;
-      animation: livePulse 1s infinite alternate;
+      box-shadow: 0 0 8px #ffffff;
+      animation: liveGlow 1s infinite alternate ease-in-out;
     }
 
-    @keyframes livePulse {
+    @keyframes liveGlow {
       0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 0.35; transform: scale(0.8); }
     }
 
-    /* 3. Bottom Right: Plain White TV Clock (No black box, just pure text) */
-    .tv-clock-time {
+    /* 3. Bottom Right: Real TV Style White Clock (Bold & Clean, No Box) */
+    .tv-clock {
       position: absolute;
       bottom: 44px;
       right: 25px;
-      z-index: 10;
+      z-index: 20;
       font-family: 'Orbitron', monospace;
-      font-size: 19px;
+      font-size: 24px;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: 1.5px;
-      /* Shadow ensures visibility over any bright video background */
-      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.8);
+      /* Heavy drop shadow ensures it pops against any background */
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.95), 0 0 15px rgba(0, 0, 0, 0.9);
     }
 
-    /* 4. Bottom Broadcast Bar with Beautiful ON AIR Badge */
+    /* 4. Bottom Broadcast Bar */
     .ticker-container {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 36px;
-      background: rgba(6, 10, 20, 0.95);
-      z-index: 10;
+      background: rgba(8, 12, 22, 0.95);
+      z-index: 20;
       display: flex;
       align-items: center;
-      border-top: 2px solid #dc2626;
+      border-top: 2px solid #e11d48;
       box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.9);
     }
 
     .on-air-badge {
-      background: #dc2626;
+      background: #e11d48;
       color: #ffffff;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 900;
-      padding: 0 16px;
+      padding: 0 18px;
       height: 100%;
       display: flex;
       align-items: center;
       gap: 6px;
       letter-spacing: 1.5px;
       flex-shrink: 0;
-      box-shadow: 4px 0 12px rgba(220, 38, 38, 0.4);
+      box-shadow: 4px 0 15px rgba(225, 29, 72, 0.5);
       z-index: 2;
-    }
-
-    .on-air-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #fff;
-      animation: livePulse 1s infinite alternate;
     }
 
     .ticker-viewport {
@@ -175,14 +191,14 @@
       margin-right: 45px;
     }
 
-    .highlight-red { color: #f87171; font-weight: 700; }
+    .highlight-red { color: #fb7185; font-weight: 700; }
     .highlight-blue { color: #38bdf8; font-weight: 700; }
-    .highlight-brand { color: #a855f7; font-weight: 800; }
+    .highlight-brand { color: #c084fc; font-weight: 800; }
   </style>
 </head>
 <body onclick="unmuteFallback()">
 
-  <!-- 1. Full-Screen Video (No side cropping) -->
+  <!-- 1. Full-Screen Video (Balanced Fit) -->
   <div class="video-viewport">
     <iframe 
       id="yt-video"
@@ -191,22 +207,25 @@
     </iframe>
   </div>
 
-  <!-- 2. Top Right: TV Logo Bug -->
-  <div class="tv-logo-bug">
-    <div class="tv-logo-name">VIRU Radio</div>
-    <div class="tv-live-badge">
-      <div class="live-pulse-dot"></div>
+  <!-- 2. Top Right: Real TV Broadcast Bug -->
+  <div class="tv-channel-bug">
+    <div class="brand-section">
+      <span class="brand-viru">VIRU</span>
+      <span class="brand-radio">RADIO</span>
+    </div>
+    <div class="live-section">
+      <span class="live-dot"></span>
       LIVE
     </div>
   </div>
 
-  <!-- 3. Bottom Right: Plain White TV Clock (Zero Boxes, Clean Text) -->
-  <div class="tv-clock-time" id="clock">00:00:00 PM</div>
+  <!-- 3. Bottom Right: Clear TV Style White Clock -->
+  <div class="tv-clock" id="clock">00:00:00 PM</div>
 
   <!-- 4. Bottom Broadcast Bar -->
   <div class="ticker-container">
     <div class="on-air-badge">
-      <div class="on-air-dot"></div>
+      <span class="live-dot"></span>
       ON AIR
     </div>
     <div class="ticker-viewport">

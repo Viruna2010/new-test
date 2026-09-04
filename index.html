@@ -490,10 +490,17 @@
       }
     }
 
-    // 4. Playlist Functions
+    // 4. Robust YouTube Link & ID Extractor (Fix for all link types)
     function extractID(url) {
-      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-      return match ? match : url.trim();
+      if (!url) return '';
+      url = url.trim();
+      // If directly an 11-char ID
+      if (/^[\w-]{11}$/.test(url)) return url;
+
+      // Handles: youtu.be, watch?v=, embed/, live/, shorts/ with any query parameters
+      const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|live\/|shorts\/))([\w-]{11})/;
+      const match = url.match(regExp);
+      return (match && match) ? match : '';
     }
 
     function addSong() {
@@ -570,14 +577,13 @@
     }
 
     function onPlayerStateChange(event) {
-      // Current song ended -> play next song automatically!
       if (event.data === YT.PlayerState.ENDED) {
         playNext();
       }
     }
 
     async function playNext() {
-      await loadFromFirebase(); // Check for newly added songs
+      await loadFromFirebase();
       currentIndex = (currentIndex + 1) % playlist.length;
       const next = playlist[currentIndex];
       updateUI();

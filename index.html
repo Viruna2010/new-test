@@ -8,13 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Montserrat:wght@700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
     body {
       background: #000;
       color: #fff;
@@ -25,7 +19,7 @@
       position: relative;
     }
 
-    /* 1. Perfect 16:9 Full-Screen Video (No black bars & no heavy crop) */
+    /* 1. Full-Screen 16:9 Video */
     .video-viewport {
       position: fixed;
       top: 50%;
@@ -38,7 +32,7 @@
       pointer-events: none;
     }
 
-    .video-viewport iframe {
+    #yt-player {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -46,12 +40,11 @@
       height: 56.25vw;
       min-height: 100vh;
       min-width: 177.78vh;
-      /* 1.08 zoom crops black edges & title, but keeps 95% width so sides are NOT cut */
       transform: translate(-50%, -50%) scale(1.08);
       border: none;
     }
 
-    /* 2. Top Right: Real TV Broadcast Watermark Bug */
+    /* 2. Top Right TV Bug */
     .tv-channel-bug {
       position: absolute;
       top: 25px;
@@ -63,7 +56,7 @@
       border: 1px solid rgba(255, 255, 255, 0.22);
       border-radius: 6px;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(10px);
     }
 
@@ -88,7 +81,6 @@
       font-size: 15px;
       letter-spacing: 1px;
       color: #ffffff;
-      opacity: 0.95;
     }
 
     .live-section {
@@ -101,7 +93,6 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
 
     .live-dot {
@@ -109,7 +100,6 @@
       height: 7px;
       border-radius: 50%;
       background: #ffffff;
-      box-shadow: 0 0 8px #ffffff;
       animation: liveGlow 1s infinite alternate ease-in-out;
     }
 
@@ -118,7 +108,7 @@
       100% { opacity: 0.35; transform: scale(0.8); }
     }
 
-    /* 3. Bottom Right: Real TV Style White Clock (Bold & Clean, No Box) */
+    /* 3. Bottom Right TV Clock */
     .tv-clock {
       position: absolute;
       bottom: 44px;
@@ -129,7 +119,6 @@
       font-weight: 800;
       color: #ffffff;
       letter-spacing: 1.5px;
-      /* Heavy drop shadow ensures it pops against any background */
       text-shadow: 0 2px 5px rgba(0, 0, 0, 0.95), 0 0 15px rgba(0, 0, 0, 0.9);
     }
 
@@ -160,7 +149,6 @@
       gap: 6px;
       letter-spacing: 1.5px;
       flex-shrink: 0;
-      box-shadow: 4px 0 15px rgba(225, 29, 72, 0.5);
       z-index: 2;
     }
 
@@ -186,11 +174,7 @@
       100% { transform: translateX(-100%); }
     }
 
-    .ticker-item {
-      display: inline-block;
-      margin-right: 45px;
-    }
-
+    .ticker-item { display: inline-block; margin-right: 45px; }
     .highlight-red { color: #fb7185; font-weight: 700; }
     .highlight-blue { color: #38bdf8; font-weight: 700; }
     .highlight-brand { color: #c084fc; font-weight: 800; }
@@ -198,16 +182,10 @@
 </head>
 <body onclick="unmuteFallback()">
 
-  <!-- 1. Full-Screen Video (Balanced Fit) -->
   <div class="video-viewport">
-    <iframe 
-      id="yt-video"
-      src="https://www.youtube.com/embed/egoeUY0PocE?autoplay=1&mute=0&loop=1&playlist=egoeUY0PocE&enablejsapi=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3"
-      allow="autoplay; encrypted-media">
-    </iframe>
+    <div id="yt-player"></div>
   </div>
 
-  <!-- 2. Top Right: Real TV Broadcast Bug -->
   <div class="tv-channel-bug">
     <div class="brand-section">
       <span class="brand-viru">VIRU</span>
@@ -219,10 +197,8 @@
     </div>
   </div>
 
-  <!-- 3. Bottom Right: Clear TV Style White Clock -->
   <div class="tv-clock" id="clock">00:00:00 PM</div>
 
-  <!-- 4. Bottom Broadcast Bar -->
   <div class="ticker-container">
     <div class="on-air-badge">
       <span class="live-dot"></span>
@@ -231,37 +207,103 @@
     <div class="ticker-viewport">
       <div class="ticker-content">
         <span class="ticker-item">★ WELCOME TO <span class="highlight-blue">VIRU RADIO LIVE</span> 24/7 BROADCAST</span>
-        <span class="ticker-item">★ <span class="highlight-red">STAY WITH US</span> — THIS IS CURRENTLY A LIVE TEST STREAM</span>
-        <span class="ticker-item">★ STREAMING HIGH FIDELITY NON-STOP MUSIC & VISUALS</span>
+        <span class="ticker-item">★ NOW PLAYING: <span class="highlight-brand" id="now-playing-title">VIRU BEATZ</span></span>
+        <span class="ticker-item">★ <span class="highlight-red">STAY WITH US</span> — 24/7 LIVE STREAMING</span>
         <span class="ticker-item">★ <span class="highlight-brand">POWERED BY VIRU BEATZ</span> — ALL RIGHTS RESERVED</span>
-        <span class="ticker-item">★ ENJOY THE RHYTHM & THANK YOU FOR WATCHING!</span>
       </div>
     </div>
   </div>
 
   <script>
-    // Exact Sri Lanka Time (SLST Asia/Colombo)
+    // 1. Clock Logic
     function updateClock() {
       const now = new Date();
-      const timeStr = now.toLocaleTimeString('en-US', {
+      document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {
         timeZone: 'Asia/Colombo',
         hour12: true,
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
       });
-      document.getElementById('clock').innerText = timeStr;
     }
-
     setInterval(updateClock, 250);
     updateClock();
 
-    // Fallback unmute
+    // 2. Playlist Engine
+    let playlist = [{ id: 'egoeUY0PocE', title: 'Meedumen Wasi', artist: 'VIRU Beatz' }];
+    let currentIndex = 0;
+    let player = null;
+
+    async function fetchPlaylist() {
+      try {
+        const res = await fetch('/playlist.json?t=' + Date.now());
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          playlist = data;
+        }
+      } catch (e) {
+        console.log("Using default playlist");
+      }
+    }
+
+    // 3. YouTube IFrame API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+
+    window.onYouTubeIframeAPIReady = async function() {
+      await fetchPlaylist();
+      createPlayer(playlist[0].id);
+    };
+
+    function createPlayer(videoId) {
+      updateNowPlayingUI();
+      player = new YT.Player('yt-player', {
+        videoId: videoId,
+        playerVars: {
+          'autoplay': 1,
+          'controls': 0,
+          'enablejsapi': 1,
+          'modestbranding': 1,
+          'rel': 0,
+          'playsinline': 1
+        },
+        events: {
+          'onReady': (e) => e.target.playVideo(),
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerStateChange(event) {
+      // When current song finishes, play NEXT song automatically!
+      if (event.data === YT.PlayerState.ENDED) {
+        playNextSong();
+      }
+    }
+
+    async function playNextSong() {
+      await fetchPlaylist(); // Check if admin added any new songs
+      currentIndex = (currentIndex + 1) % playlist.length;
+      const nextSong = playlist[currentIndex];
+      updateNowPlayingUI();
+
+      if (player && typeof player.loadVideoById === 'function') {
+        player.loadVideoById(nextSong.id);
+      }
+    }
+
+    function updateNowPlayingUI() {
+      const current = playlist[currentIndex];
+      if (current) {
+        document.getElementById('now-playing-title').innerText = `${current.title} (${current.artist})`;
+      }
+    }
+
     function unmuteFallback() {
-      const iframe = document.getElementById('yt-video');
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+      if (player && typeof player.unMute === 'function') {
+        player.playVideo();
+        player.unMute();
       }
     }
   </script>

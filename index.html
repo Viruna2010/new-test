@@ -19,7 +19,7 @@
       position: relative;
     }
 
-    /* 1. Fast, Lag-Free Full-Screen Video */
+    /* 1. True Edge-to-Edge 16:9 Full Screen (No Black Bars, Crops Title & YT Watermark) */
     .video-viewport {
       position: fixed;
       top: 0;
@@ -32,12 +32,19 @@
     }
 
     #yt-player {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vw;
+      height: 56.25vw;
+      min-height: 100vh;
+      min-width: 177.78vh;
+      /* 1.18 Scale completely eliminates side black bars and pushes YouTube Title & Logo off-screen */
+      transform: translate(-50%, -50%) scale(1.18);
       border: none;
     }
 
-    /* 2. Top Right: TV Bug */
+    /* 2. Top Right: Real TV Broadcast Logo Bug */
     .tv-channel-bug {
       position: absolute;
       top: 25px;
@@ -166,7 +173,64 @@
     .highlight-brand { color: #c084fc; font-weight: 800; }
 
     /* =========================================================
-       ADMIN DRAWER (Press 'A')
+       5. BLURRED "LISTEN LIVE" SPLASH OVERLAY (Before First Click)
+       ========================================================= */
+    #splash-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 9, 20, 0.75);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .splash-box {
+      text-align: center;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 40px 55px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .splash-title {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .splash-btn {
+      margin-top: 22px;
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 14px 32px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 25px rgba(2, 132, 199, 0.5);
+      animation: pulseBtn 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulseBtn {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(2, 132, 199, 0.5); }
+      50% { transform: scale(1.04); box-shadow: 0 0 35px rgba(2, 132, 199, 0.8); }
+    }
+
+    /* =========================================================
+       ADMIN DRAWER (Press 'A' Key)
        ========================================================= */
     #admin-overlay {
       position: fixed;
@@ -288,9 +352,9 @@
     }
   </style>
 </head>
-<body onclick="unmuteFallback()">
+<body>
 
-  <!-- 1. Video Stage -->
+  <!-- 1. Video Stage (True 16:9 Full Screen Cover) -->
   <div class="video-viewport">
     <div id="yt-player"></div>
   </div>
@@ -326,6 +390,17 @@
     </div>
   </div>
 
+  <!-- 5. Blurred "LISTEN LIVE" Splash Screen (Hides initial raw thumbnail) -->
+  <div id="splash-screen" onclick="startBroadcast()">
+    <div class="splash-box">
+      <div class="splash-title">VIRU RADIO</div>
+      <p style="color: #94a3b8; font-size: 13px; letter-spacing: 1px;">24/7 LIVE TV & MUSIC BROADCAST</p>
+      <div class="splash-btn">
+        <span>▶</span> TAP TO LISTEN LIVE
+      </div>
+    </div>
+  </div>
+
   <!-- PASSWORD DIALOG (Press 'A') -->
   <div id="pw-dialog">
     <div class="pw-card">
@@ -341,8 +416,8 @@
   </div>
 
   <!-- ADMIN DRAWER -->
-  <div id="admin-overlay">
-    <div class="admin-card">
+  <div id="admin-overlay" onclick="event.stopPropagation()">
+    <div class="admin-card" onclick="event.stopPropagation()">
       <div class="admin-header">
         <h2>🔥 VIRU RADIO • ADMIN PANEL</h2>
         <button class="close-btn" onclick="closeAdmin()">✕</button>
@@ -352,8 +427,8 @@
       <div class="control-box">
         <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE PLAYBACK CONTROLS</div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-action" id="btn-pause-play" style="background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause()">⏸ Pause Video</button>
-          <button class="btn-action" style="background: #6366f1; color: #fff; font-weight: 800;" onclick="skipNextSong()">⏭ Next Song</button>
+          <button class="btn-action" id="btn-pause-play" style="background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause(event)">⏸ Pause Video & Audio</button>
+          <button class="btn-action" style="background: #6366f1; color: #fff; font-weight: 800;" onclick="skipNextSong(event)">⏭ Next Song</button>
         </div>
       </div>
 
@@ -393,8 +468,9 @@
     let currentIndex = 0;
     let player = null;
     let isPaused = false;
+    let hasStarted = false;
 
-    // 1. Clock (Lag-Free 1000ms update)
+    // 1. Clock (Asia/Colombo SLST)
     function updateClock() {
       const now = new Date();
       document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {
@@ -408,18 +484,39 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 2. Secret 'A' Key Handler
+    // 2. Start Broadcast from Blurred Splash Screen
+    function startBroadcast() {
+      const splash = document.getElementById('splash-screen');
+      splash.style.opacity = '0';
+      splash.style.visibility = 'hidden';
+      setTimeout(() => { splash.style.display = 'none'; }, 600);
+
+      hasStarted = true;
+      if (player && typeof player.playVideo === 'function') {
+        player.playVideo();
+        player.unMute();
+      }
+    }
+
+    // 3. Secret 'A' Key Handler (Fix: e.preventDefault stops 'A' from entering password box)
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT') return;
       if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
         openPasswordDialog();
       }
     });
 
     function openPasswordDialog() {
-      document.getElementById('pw-dialog').style.display = 'flex';
-      document.getElementById('admin-pass-input').value = '';
-      document.getElementById('admin-pass-input').focus();
+      const dialog = document.getElementById('pw-dialog');
+      const passInput = document.getElementById('admin-pass-input');
+      dialog.style.display = 'flex';
+      passInput.value = '';
+      document.getElementById('pw-err').innerText = '';
+      setTimeout(() => {
+        passInput.value = '';
+        passInput.focus();
+      }, 50);
     }
 
     function closePasswordDialog() {
@@ -449,41 +546,59 @@
       document.getElementById('admin-overlay').style.display = 'none';
     }
 
-    // 3. Instant Pause / Resume Controls
-    function togglePlayPause() {
+    // 4. Fixed Playback Controls (e.stopPropagation prevents resume on body click)
+    function togglePlayPause(e) {
+      if (e) e.stopPropagation();
       const btn = document.getElementById('btn-pause-play');
-      const iframe = document.querySelector('#yt-player');
 
       if (!isPaused) {
-        if (player && typeof player.pauseVideo === 'function') {
-          player.pauseVideo();
+        // PAUSE & MUTE
+        if (player) {
+          try { player.pauseVideo(); } catch (err) {}
+          try { player.mute(); } catch (err) {}
         }
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-        }
+        document.querySelectorAll('iframe').forEach(f => {
+          try {
+            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'mute', args: [] }), '*');
+          } catch (err) {}
+        });
+
         isPaused = true;
-        btn.innerText = '▶ Resume Video';
+        btn.innerText = '▶ Resume Playback';
         btn.style.background = '#16a34a';
         btn.style.color = '#fff';
       } else {
-        if (player && typeof player.playVideo === 'function') {
-          player.playVideo();
+        // RESUME & UNMUTE
+        if (player) {
+          try { player.unMute(); } catch (err) {}
+          try { player.playVideo(); } catch (err) {}
         }
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        }
+        document.querySelectorAll('iframe').forEach(f => {
+          try {
+            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*');
+            f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+          } catch (err) {}
+        });
+
         isPaused = false;
-        btn.innerText = '⏸ Pause Video';
+        btn.innerText = '⏸ Pause Video & Audio';
         btn.style.background = '#eab308';
         btn.style.color = '#000';
       }
     }
 
-    function skipNextSong() {
+    function skipNextSong(e) {
+      if (e) e.stopPropagation();
+      isPaused = false;
+      const btn = document.getElementById('btn-pause-play');
+      btn.innerText = '⏸ Pause Video & Audio';
+      btn.style.background = '#eab308';
+      btn.style.color = '#000';
       playNext();
     }
 
-    // 4. Firebase Sync Engine
+    // 5. Firebase Sync Engine
     async function loadFromFirebase() {
       try {
         const res = await fetch(FIREBASE_URL);
@@ -523,7 +638,7 @@
       }
     }
 
-    // 5. 100% Robust YouTube Link Extractor (Zero-Regex String Search)
+    // 6. Direct String YouTube Link Extractor
     function extractID(url) {
       if (!url) return '';
       url = String(url).trim();
@@ -594,7 +709,7 @@
       });
     }
 
-    // 6. YouTube Player Engine
+    // 7. YouTube Player Engine
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -617,7 +732,13 @@
           'playsinline': 1
         },
         events: {
-          'onReady': (e) => e.target.playVideo(),
+          'onReady': (e) => {
+            player = e.target;
+            // If in headless runner (automated), auto play
+            if (navigator.userAgent.includes('Headless') || window.location.search.includes('autoplay=1')) {
+              startBroadcast();
+            }
+          },
           'onStateChange': onPlayerStateChange
         }
       });
@@ -644,13 +765,6 @@
       const cur = playlist[currentIndex];
       if (cur) {
         document.getElementById('now-playing-title').innerText = `${cur.title} • ${cur.artist}`;
-      }
-    }
-
-    function unmuteFallback() {
-      if (player && typeof player.unMute === 'function') {
-        player.playVideo();
-        player.unMute();
       }
     }
   </script>

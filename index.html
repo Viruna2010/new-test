@@ -19,32 +19,25 @@
       position: relative;
     }
 
-    /* 1. Full-Screen Video (Balanced 16:9 Fit, Zero black bars) */
+    /* 1. Fast, Lag-Free Full-Screen Video */
     .video-viewport {
       position: fixed;
-      top: 50%;
-      left: 50%;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
-      transform: translate(-50%, -50%);
       overflow: hidden;
       z-index: 1;
       pointer-events: none;
     }
 
     #yt-player {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100vw;
-      height: 56.25vw;
-      min-height: 100vh;
-      min-width: 177.78vh;
-      transform: translate(-50%, -50%) scale(1.08);
+      width: 100%;
+      height: 100%;
       border: none;
     }
 
-    /* 2. Top Right: Real TV Broadcast Bug */
+    /* 2. Top Right: TV Bug */
     .tv-channel-bug {
       position: absolute;
       top: 25px;
@@ -52,12 +45,11 @@
       z-index: 20;
       display: flex;
       align-items: center;
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.8) 100%);
+      background: rgba(15, 23, 42, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.22);
       border-radius: 6px;
       overflow: hidden;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(10px);
     }
 
     .brand-section {
@@ -100,12 +92,6 @@
       height: 7px;
       border-radius: 50%;
       background: #ffffff;
-      animation: liveGlow 1s infinite alternate ease-in-out;
-    }
-
-    @keyframes liveGlow {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0.35; transform: scale(0.8); }
     }
 
     /* 3. Bottom Right: Plain White TV Clock */
@@ -180,7 +166,7 @@
     .highlight-brand { color: #c084fc; font-weight: 800; }
 
     /* =========================================================
-       SECRET ADMIN DRAWER (Press 'A')
+       ADMIN DRAWER (Press 'A')
        ========================================================= */
     #admin-overlay {
       position: fixed;
@@ -190,7 +176,6 @@
       display: none;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(10px);
     }
 
     .admin-card {
@@ -198,10 +183,10 @@
       border: 1px solid #334155;
       border-radius: 16px;
       width: 90%;
-      max-width: 580px;
+      max-width: 560px;
       max-height: 90vh;
       overflow-y: auto;
-      padding: 25px;
+      padding: 24px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.9);
       user-select: auto;
     }
@@ -212,19 +197,19 @@
       align-items: center;
       border-bottom: 2px solid #1e293b;
       padding-bottom: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
-    .admin-header h2 { font-size: 18px; color: #38bdf8; }
+    .admin-header h2 { font-size: 17px; color: #38bdf8; }
     .close-btn { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; font-weight: bold; }
     .close-btn:hover { color: #fff; }
 
     .control-box {
       background: #1e293b;
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-radius: 8px;
       border: 1px solid #334155;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .form-group { margin-bottom: 12px; }
@@ -265,11 +250,11 @@
       cursor: pointer;
       width: 100%;
       font-size: 14px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
     .btn-save-fb:hover { background: #15803d; }
 
-    .queue-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+    .queue-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
     .queue-item {
       background: #1e293b;
       padding: 8px 12px;
@@ -341,7 +326,7 @@
     </div>
   </div>
 
-  <!-- PASSWORD DIALOG (Triggered by 'A' Key) -->
+  <!-- PASSWORD DIALOG (Press 'A') -->
   <div id="pw-dialog">
     <div class="pw-card">
       <h3 style="font-size: 16px; margin-bottom: 10px; color: #38bdf8;">Admin Access</h3>
@@ -363,9 +348,9 @@
         <button class="close-btn" onclick="closeAdmin()">✕</button>
       </div>
 
-      <!-- LIVE PLAYBACK CONTROLS -->
+      <!-- PLAYBACK CONTROLS -->
       <div class="control-box">
-        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE BROADCAST CONTROLS</div>
+        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE PLAYBACK CONTROLS</div>
         <div style="display: flex; gap: 8px;">
           <button class="btn-action" id="btn-pause-play" style="background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause()">⏸ Pause Video</button>
           <button class="btn-action" style="background: #6366f1; color: #fff; font-weight: 800;" onclick="skipNextSong()">⏭ Next Song</button>
@@ -388,7 +373,7 @@
       </div>
       <button class="btn-action" onclick="addSong()">+ Add to Queue</button>
 
-      <div style="margin-top: 20px;">
+      <div style="margin-top: 16px;">
         <label style="font-size: 12px; color: #94a3b8; font-weight: 700;">Active Playlist (<span id="song-count">0</span>):</label>
         <div class="queue-list" id="queue-box"></div>
       </div>
@@ -399,20 +384,17 @@
   </div>
 
   <script>
-    // =========================================================
-    // CONFIGURATION
-    // =========================================================
     const ADMIN_PASSWORD = "viru";
     const FIREBASE_URL = "https://radio-caf5e-default-rtdb.firebaseio.com/playlist.json";
 
-    // Default Fallback
     let playlist = [
       { id: "egoeUY0PocE", title: "Meedumen Wasi", artist: "VIRU Beatz" }
     ];
     let currentIndex = 0;
     let player = null;
+    let isPaused = false;
 
-    // 1. Clock (Asia/Colombo SLST)
+    // 1. Clock (Lag-Free 1000ms update)
     function updateClock() {
       const now = new Date();
       document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {
@@ -423,7 +405,7 @@
         second: '2-digit'
       });
     }
-    setInterval(updateClock, 250);
+    setInterval(updateClock, 1000);
     updateClock();
 
     // 2. Secret 'A' Key Handler
@@ -467,19 +449,30 @@
       document.getElementById('admin-overlay').style.display = 'none';
     }
 
-    // 3. Playback Controls (Pause / Resume / Next)
+    // 3. Instant Pause / Resume Controls
     function togglePlayPause() {
-      if (!player || typeof player.getPlayerState !== 'function') return;
-      const state = player.getPlayerState();
       const btn = document.getElementById('btn-pause-play');
+      const iframe = document.querySelector('#yt-player');
 
-      if (state === YT.PlayerState.PLAYING) {
-        player.pauseVideo();
+      if (!isPaused) {
+        if (player && typeof player.pauseVideo === 'function') {
+          player.pauseVideo();
+        }
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        }
+        isPaused = true;
         btn.innerText = '▶ Resume Video';
         btn.style.background = '#16a34a';
         btn.style.color = '#fff';
       } else {
-        player.playVideo();
+        if (player && typeof player.playVideo === 'function') {
+          player.playVideo();
+        }
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        }
+        isPaused = false;
         btn.innerText = '⏸ Pause Video';
         btn.style.background = '#eab308';
         btn.style.color = '#000';
@@ -490,7 +483,7 @@
       playNext();
     }
 
-    // 4. Firebase REST API Engine
+    // 4. Firebase Sync Engine
     async function loadFromFirebase() {
       try {
         const res = await fetch(FIREBASE_URL);
@@ -530,31 +523,31 @@
       }
     }
 
-    // 5. Bulletproof YouTube ID Extractor (Zero-regex split parser)
+    // 5. 100% Robust YouTube Link Extractor (Zero-Regex String Search)
     function extractID(url) {
       if (!url) return '';
-      url = url.trim();
+      url = String(url).trim();
+      let id = '';
 
-      // Handles youtu.be/xxxx links
-      if (url.includes('youtu.be/')) {
-        return url.split('youtu.be/').split('?')[0].split('&')[0].substring(0, 11);
+      if (url.indexOf('v=') !== -1) {
+        let afterV = url.substring(url.indexOf('v=') + 2);
+        id = afterV.split('&')[0];
+      } else if (url.indexOf('youtu.be/') !== -1) {
+        let afterB = url.substring(url.indexOf('youtu.be/') + 9);
+        id = afterB.split('?')[0].split('&')[0];
+      } else if (url.indexOf('embed/') !== -1) {
+        let afterE = url.substring(url.indexOf('embed/') + 6);
+        id = afterE.split('?')[0].split('&')[0];
+      } else if (url.indexOf('shorts/') !== -1) {
+        let afterS = url.substring(url.indexOf('shorts/') + 7);
+        id = afterS.split('?')[0].split('&')[0];
+      } else if (url.indexOf('live/') !== -1) {
+        let afterL = url.substring(url.indexOf('live/') + 5);
+        id = afterL.split('?')[0].split('&')[0];
+      } else {
+        id = url;
       }
-      // Handles youtube.com/watch?v=xxxx links
-      if (url.includes('v=')) {
-        return url.split('v=').split('&')[0].substring(0, 11);
-      }
-      // Handles embed/, shorts/, live/
-      if (url.includes('embed/')) {
-        return url.split('embed/').split('?')[0].substring(0, 11);
-      }
-      if (url.includes('shorts/')) {
-        return url.split('shorts/').split('?')[0].substring(0, 11);
-      }
-      if (url.includes('live/')) {
-        return url.split('live/').split('?')[0].substring(0, 11);
-      }
-      // If already a raw 11-char ID
-      return url.substring(0, 11);
+      return id.trim().substring(0, 11);
     }
 
     function addSong() {
@@ -601,7 +594,7 @@
       });
     }
 
-    // 6. YouTube Player Engine (Auto-Advance & Loop)
+    // 6. YouTube Player Engine
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);

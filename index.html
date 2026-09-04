@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIRU Radio - Live Broadcast</title>
+  <title>VIRU Radio - Live TV Broadcast</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Montserrat:wght@700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Montserrat:wght@700;800;900&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
     body {
@@ -19,7 +19,7 @@
       position: relative;
     }
 
-    /* 1. Full-Screen 16:9 Video */
+    /* 1. Full-Screen Video (Balanced 16:9 Fit, Zero black bars) */
     .video-viewport {
       position: fixed;
       top: 50%;
@@ -44,7 +44,7 @@
       border: none;
     }
 
-    /* 2. Top Right TV Bug */
+    /* 2. Top Right: Real TV Broadcast Bug */
     .tv-channel-bug {
       position: absolute;
       top: 25px;
@@ -108,7 +108,7 @@
       100% { opacity: 0.35; transform: scale(0.8); }
     }
 
-    /* 3. Bottom Right TV Clock */
+    /* 3. Bottom Right: Plain White TV Clock */
     .tv-clock {
       position: absolute;
       bottom: 44px;
@@ -178,14 +178,131 @@
     .highlight-red { color: #fb7185; font-weight: 700; }
     .highlight-blue { color: #38bdf8; font-weight: 700; }
     .highlight-brand { color: #c084fc; font-weight: 800; }
+
+    /* =========================================================
+       SECRET ADMIN DRAWER (Press 'A')
+       ========================================================= */
+    #admin-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .admin-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+      user-select: auto;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #1e293b;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .admin-header h2 { font-size: 18px; color: #38bdf8; }
+    .close-btn { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; font-weight: bold; }
+    .close-btn:hover { color: #fff; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+    .form-group input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-family: inherit;
+    }
+    .form-group input:focus { outline: none; border-color: #38bdf8; }
+
+    .btn-action {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      font-size: 13.5px;
+      margin-top: 4px;
+    }
+    .btn-action:hover { background: #0369a1; }
+
+    .btn-save-fb {
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      cursor: pointer;
+      width: 100%;
+      font-size: 14px;
+      margin-top: 18px;
+    }
+    .btn-save-fb:hover { background: #15803d; }
+
+    .queue-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+    .queue-item {
+      background: #1e293b;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #334155;
+      gap: 10px;
+    }
+    .queue-text { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+    .btn-del { background: #dc2626; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+
+    /* Password Dialog */
+    #pw-dialog {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .pw-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 25px;
+      border-radius: 12px;
+      width: 320px;
+      text-align: center;
+    }
   </style>
 </head>
 <body onclick="unmuteFallback()">
 
+  <!-- 1. Video Stage -->
   <div class="video-viewport">
     <div id="yt-player"></div>
   </div>
 
+  <!-- 2. TV Logo Bug -->
   <div class="tv-channel-bug">
     <div class="brand-section">
       <span class="brand-viru">VIRU</span>
@@ -197,8 +314,10 @@
     </div>
   </div>
 
+  <!-- 3. TV Clock -->
   <div class="tv-clock" id="clock">00:00:00 PM</div>
 
+  <!-- 4. Bottom Broadcast Bar -->
   <div class="ticker-container">
     <div class="on-air-badge">
       <span class="live-dot"></span>
@@ -214,8 +333,69 @@
     </div>
   </div>
 
+  <!-- PASSWORD DIALOG (Triggered by 'A' Key) -->
+  <div id="pw-dialog">
+    <div class="pw-card">
+      <h3 style="font-size: 16px; margin-bottom: 10px; color: #38bdf8;">Admin Access</h3>
+      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Password එක ගසා Enter ඔබන්න:</p>
+      <input type="password" id="admin-pass-input" placeholder="Password..." style="width: 100%; padding: 8px 12px; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 6px; margin-bottom: 12px;">
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-action" onclick="verifyPassword()">Unlock</button>
+        <button class="btn-action" style="background:#475569;" onclick="closePasswordDialog()">Cancel</button>
+      </div>
+      <div id="pw-err" style="color:#ef4444; font-size:11px; margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN DRAWER -->
+  <div id="admin-overlay">
+    <div class="admin-card">
+      <div class="admin-header">
+        <h2>🔥 VIRU RADIO • FIREBASE PLAYLIST ADMIN</h2>
+        <button class="close-btn" onclick="closeAdmin()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>YouTube Video Link or ID:</label>
+        <input type="text" id="add-yt" placeholder="https://youtu.be/... or Video ID">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <div class="form-group" style="flex:1;">
+          <label>Song Title:</label>
+          <input type="text" id="add-title" placeholder="e.g. Meedumen Wasi">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Artist:</label>
+          <input type="text" id="add-artist" placeholder="e.g. VIRU Beatz">
+        </div>
+      </div>
+      <button class="btn-action" onclick="addSong()">+ Add to Queue</button>
+
+      <div style="margin-top: 20px;">
+        <label style="font-size: 12px; color: #94a3b8; font-weight: 700;">Active Playlist (<span id="song-count">0</span>):</label>
+        <div class="queue-list" id="queue-box"></div>
+      </div>
+
+      <button class="btn-save-fb" onclick="saveToFirebase()">🔥 Save to Firebase (Realtime Sync)</button>
+      <div id="save-status" style="font-size: 12px; text-align: center; margin-top: 8px;"></div>
+    </div>
+  </div>
+
   <script>
-    // 1. Clock Logic
+    // =========================================================
+    // CONFIGURATION (Configured with your Firebase Database)
+    // =========================================================
+    const ADMIN_PASSWORD = "viru"; // ඔබේ Admin Password එක
+    const FIREBASE_URL = "https://radio-caf5e-default-rtdb.firebaseio.com/playlist.json";
+
+    // Default Fallback Playlist
+    let playlist = [
+      { id: "egoeUY0PocE", title: "Meedumen Wasi", artist: "VIRU Beatz" }
+    ];
+    let currentIndex = 0;
+    let player = null;
+
+    // 1. Clock (Asia/Colombo SLST)
     function updateClock() {
       const now = new Date();
       document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {
@@ -229,35 +409,149 @@
     setInterval(updateClock, 250);
     updateClock();
 
-    // 2. Playlist Engine
-    let playlist = [{ id: 'egoeUY0PocE', title: 'Meedumen Wasi', artist: 'VIRU Beatz' }];
-    let currentIndex = 0;
-    let player = null;
+    // 2. Secret 'A' Key Handler
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'a' || e.key === 'A') {
+        openPasswordDialog();
+      }
+    });
 
-    async function fetchPlaylist() {
-      try {
-        const res = await fetch('/playlist.json?t=' + Date.now());
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          playlist = data;
-        }
-      } catch (e) {
-        console.log("Using default playlist");
+    function openPasswordDialog() {
+      document.getElementById('pw-dialog').style.display = 'flex';
+      document.getElementById('admin-pass-input').value = '';
+      document.getElementById('admin-pass-input').focus();
+    }
+
+    function closePasswordDialog() {
+      document.getElementById('pw-dialog').style.display = 'none';
+    }
+
+    function verifyPassword() {
+      const input = document.getElementById('admin-pass-input').value;
+      if (input === ADMIN_PASSWORD) {
+        closePasswordDialog();
+        openAdmin();
+      } else {
+        document.getElementById('pw-err').innerText = 'වැරදි Password එකක්!';
       }
     }
 
-    // 3. YouTube IFrame API
+    document.getElementById('admin-pass-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyPassword();
+    });
+
+    function openAdmin() {
+      document.getElementById('admin-overlay').style.display = 'flex';
+      renderQueue();
+    }
+
+    function closeAdmin() {
+      document.getElementById('admin-overlay').style.display = 'none';
+    }
+
+    // 3. Firebase REST API Engine
+    async function loadFromFirebase() {
+      try {
+        const res = await fetch(FIREBASE_URL);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            playlist = data;
+          }
+        }
+      } catch (err) {
+        console.log("Firebase sync fallback");
+      }
+    }
+
+    async function saveToFirebase() {
+      const status = document.getElementById('save-status');
+      status.style.color = '#38bdf8';
+      status.innerText = 'Firebase වෙත Save වෙමින් පවතී...';
+
+      try {
+        const res = await fetch(FIREBASE_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(playlist)
+        });
+        if (res.ok) {
+          status.style.color = '#22c55e';
+          status.innerText = '✓ Firebase එකේ සදහටම Save වුණා!';
+          setTimeout(() => { status.innerText = ''; }, 3000);
+        } else {
+          status.style.color = '#ef4444';
+          status.innerText = 'Save Failed!';
+        }
+      } catch (e) {
+        status.style.color = '#ef4444';
+        status.innerText = 'Network Error: ' + e.message;
+      }
+    }
+
+    // 4. Playlist Functions
+    function extractID(url) {
+      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      return match ? match : url.trim();
+    }
+
+    function addSong() {
+      const url = document.getElementById('add-yt').value;
+      const title = document.getElementById('add-title').value.trim() || 'New Track';
+      const artist = document.getElementById('add-artist').value.trim() || 'VIRU Radio';
+
+      const id = extractID(url);
+      if (!id || id.length !== 11) {
+        alert('කරුණාකර නිවැරදි YouTube Link එකක් ලබාදෙන්න!');
+        return;
+      }
+
+      playlist.push({ id, title, artist });
+      renderQueue();
+
+      document.getElementById('add-yt').value = '';
+      document.getElementById('add-title').value = '';
+      document.getElementById('add-artist').value = '';
+    }
+
+    function removeSong(idx) {
+      if (playlist.length <= 1) {
+        alert('අවම වශයෙන් එක සින්දුවක්වත් තිබිය යුතුය!');
+        return;
+      }
+      playlist.splice(idx, 1);
+      renderQueue();
+    }
+
+    function renderQueue() {
+      const box = document.getElementById('queue-box');
+      document.getElementById('song-count').innerText = playlist.length;
+      box.innerHTML = '';
+
+      playlist.forEach((s, i) => {
+        const row = document.createElement('div');
+        row.className = 'queue-item';
+        row.innerHTML = `
+          <span class="queue-text">${i + 1}. ${s.title} - <small style="color:#94a3b8;">${s.artist}</small></span>
+          <button class="btn-del" onclick="removeSong(${i})">✕</button>
+        `;
+        box.appendChild(row);
+      });
+    }
+
+    // 5. YouTube Player Engine (Auto-Advance & Infinite Loop)
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
 
     window.onYouTubeIframeAPIReady = async function() {
-      await fetchPlaylist();
+      await loadFromFirebase();
       createPlayer(playlist[0].id);
     };
 
     function createPlayer(videoId) {
-      updateNowPlayingUI();
+      updateUI();
       player = new YT.Player('yt-player', {
         videoId: videoId,
         playerVars: {
@@ -276,27 +570,27 @@
     }
 
     function onPlayerStateChange(event) {
-      // When current song finishes, play NEXT song automatically!
+      // Current song ended -> play next song automatically!
       if (event.data === YT.PlayerState.ENDED) {
-        playNextSong();
+        playNext();
       }
     }
 
-    async function playNextSong() {
-      await fetchPlaylist(); // Check if admin added any new songs
+    async function playNext() {
+      await loadFromFirebase(); // Check for newly added songs
       currentIndex = (currentIndex + 1) % playlist.length;
-      const nextSong = playlist[currentIndex];
-      updateNowPlayingUI();
+      const next = playlist[currentIndex];
+      updateUI();
 
       if (player && typeof player.loadVideoById === 'function') {
-        player.loadVideoById(nextSong.id);
+        player.loadVideoById(next.id);
       }
     }
 
-    function updateNowPlayingUI() {
-      const current = playlist[currentIndex];
-      if (current) {
-        document.getElementById('now-playing-title').innerText = `${current.title} (${current.artist})`;
+    function updateUI() {
+      const cur = playlist[currentIndex];
+      if (cur) {
+        document.getElementById('now-playing-title').innerText = `${cur.title} • ${cur.artist}`;
       }
     }
 

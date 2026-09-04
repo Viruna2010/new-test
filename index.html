@@ -44,7 +44,7 @@
       transition: transform 0.2s ease-out;
     }
 
-    /* 2. Top Right: Real TV Broadcast Bug */
+    /* 2. Top Right: TV Logo Bug */
     .tv-channel-bug {
       position: absolute;
       top: 25px;
@@ -243,9 +243,7 @@
       box-shadow: 0 0 25px rgba(2, 132, 199, 0.5);
     }
 
-    /* =========================================================
-       ADMIN DRAWER (Press 'A')
-       ========================================================= */
+    /* ADMIN DRAWER (Press 'A') */
     #admin-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -771,7 +769,7 @@
       });
     }
 
-    // 8. YouTube Player Engine (Configured with Privacy Host to Bypass Bot Check)
+    // 8. YouTube Player Engine (Using standard YouTube domain to receive your cookies)
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -784,7 +782,6 @@
     function createPlayer(videoId) {
       updateUI();
       player = new YT.Player('yt-player', {
-        host: 'https://www.youtube-nocookie.com',
         videoId: videoId,
         playerVars: {
           'autoplay': 1,

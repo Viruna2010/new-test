@@ -19,7 +19,7 @@
       position: relative;
     }
 
-    /* 1. True Edge-to-Edge 16:9 Full Screen (No Black Bars, Crops Title & YT Watermark) */
+    /* 1. Video Viewport (Controlled dynamically by Zoom settings) */
     .video-viewport {
       position: fixed;
       top: 0;
@@ -39,12 +39,12 @@
       height: 56.25vw;
       min-height: 100vh;
       min-width: 177.78vh;
-      /* 1.18 Scale completely eliminates side black bars and pushes YouTube Title & Logo off-screen */
-      transform: translate(-50%, -50%) scale(1.18);
+      transform: translate(-50%, -50%) scale(1.05); /* Default 105% (adjustable via Admin) */
       border: none;
+      transition: transform 0.2s ease-out;
     }
 
-    /* 2. Top Right: Real TV Broadcast Logo Bug */
+    /* 2. Top Right: TV Logo Bug */
     .tv-channel-bug {
       position: absolute;
       top: 25px;
@@ -172,9 +172,7 @@
     .highlight-blue { color: #38bdf8; font-weight: 700; }
     .highlight-brand { color: #c084fc; font-weight: 800; }
 
-    /* =========================================================
-       5. BLURRED "LISTEN LIVE" SPLASH OVERLAY (Before First Click)
-       ========================================================= */
+    /* 5. BLURRED SPLASH OVERLAY */
     #splash-screen {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -221,17 +219,9 @@
       align-items: center;
       gap: 10px;
       box-shadow: 0 0 25px rgba(2, 132, 199, 0.5);
-      animation: pulseBtn 1.8s infinite ease-in-out;
     }
 
-    @keyframes pulseBtn {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(2, 132, 199, 0.5); }
-      50% { transform: scale(1.04); box-shadow: 0 0 35px rgba(2, 132, 199, 0.8); }
-    }
-
-    /* =========================================================
-       ADMIN DRAWER (Press 'A' Key)
-       ========================================================= */
+    /* ADMIN DRAWER (Press 'A') */
     #admin-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -273,7 +263,7 @@
       padding: 12px 14px;
       border-radius: 8px;
       border: 1px solid #334155;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .form-group { margin-bottom: 12px; }
@@ -298,9 +288,7 @@
       border-radius: 6px;
       font-weight: 700;
       cursor: pointer;
-      width: 100%;
       font-size: 13.5px;
-      margin-top: 4px;
     }
     .btn-action:hover { background: #0369a1; }
 
@@ -318,7 +306,7 @@
     }
     .btn-save-fb:hover { background: #15803d; }
 
-    .queue-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
+    .queue-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto; }
     .queue-item {
       background: #1e293b;
       padding: 8px 12px;
@@ -354,7 +342,7 @@
 </head>
 <body>
 
-  <!-- 1. Video Stage (True 16:9 Full Screen Cover) -->
+  <!-- 1. Video Stage -->
   <div class="video-viewport">
     <div id="yt-player"></div>
   </div>
@@ -390,7 +378,7 @@
     </div>
   </div>
 
-  <!-- 5. Blurred "LISTEN LIVE" Splash Screen (Hides initial raw thumbnail) -->
+  <!-- 5. Blurred Splash Screen -->
   <div id="splash-screen" onclick="startBroadcast()">
     <div class="splash-box">
       <div class="splash-title">VIRU RADIO</div>
@@ -408,8 +396,8 @@
       <p style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Password එක ගසා Enter ඔබන්න:</p>
       <input type="password" id="admin-pass-input" placeholder="Password..." style="width: 100%; padding: 8px 12px; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 6px; margin-bottom: 12px;">
       <div style="display: flex; gap: 8px;">
-        <button class="btn-action" onclick="verifyPassword()">Unlock</button>
-        <button class="btn-action" style="background:#475569;" onclick="closePasswordDialog()">Cancel</button>
+        <button class="btn-action" style="flex:1;" onclick="verifyPassword()">Unlock</button>
+        <button class="btn-action" style="flex:1; background:#475569;" onclick="closePasswordDialog()">Cancel</button>
       </div>
       <div id="pw-err" style="color:#ef4444; font-size:11px; margin-top:8px;"></div>
     </div>
@@ -425,13 +413,27 @@
 
       <!-- PLAYBACK CONTROLS -->
       <div class="control-box">
-        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE PLAYBACK CONTROLS</div>
+        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">LIVE BROADCAST CONTROLS</div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-action" id="btn-pause-play" style="background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause(event)">⏸ Pause Video & Audio</button>
-          <button class="btn-action" style="background: #6366f1; color: #fff; font-weight: 800;" onclick="skipNextSong(event)">⏭ Next Song</button>
+          <button class="btn-action" id="btn-pause-play" style="flex:1; background: #eab308; color: #000; font-weight: 800;" onclick="togglePlayPause(event)">⏸ Pause Video & Audio</button>
+          <button class="btn-action" style="flex:1; background: #6366f1; color: #fff; font-weight: 800;" onclick="skipNextSong(event)">⏭ Next Song</button>
         </div>
       </div>
 
+      <!-- VIDEO ZOOM ADJUSTER (+ and - Buttons & Slider) -->
+      <div class="control-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px;">VIDEO SCREEN ZOOM (FIT SIZE)</span>
+          <span id="zoom-val" style="font-family: monospace; font-size: 13px; font-weight: 800; color: #c084fc;">105%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button class="btn-action" style="width: 44px; font-size: 18px; padding: 4px; background: #334155;" onclick="changeZoom(-0.01)">−</button>
+          <input type="range" id="zoom-slider" min="1.00" max="1.30" step="0.01" value="1.05" oninput="applyZoom(this.value)" style="flex: 1; cursor: pointer;">
+          <button class="btn-action" style="width: 44px; font-size: 18px; padding: 4px; background: #334155;" onclick="changeZoom(0.01)">+</button>
+        </div>
+      </div>
+
+      <!-- ADD SONG INPUTS -->
       <div class="form-group">
         <label>YouTube Video Link or ID:</label>
         <input type="text" id="add-yt" placeholder="Paste YouTube link here...">
@@ -446,7 +448,7 @@
           <input type="text" id="add-artist" placeholder="e.g. Artist / Channel">
         </div>
       </div>
-      <button class="btn-action" onclick="addSong()">+ Add to Queue</button>
+      <button class="btn-action" style="width:100%;" onclick="addSong()">+ Add to Queue</button>
 
       <div style="margin-top: 16px;">
         <label style="font-size: 12px; color: #94a3b8; font-weight: 700;">Active Playlist (<span id="song-count">0</span>):</label>
@@ -469,6 +471,7 @@
     let player = null;
     let isPaused = false;
     let hasStarted = false;
+    let currentZoom = 1.05; // Default 105%
 
     // 1. Clock (Asia/Colombo SLST)
     function updateClock() {
@@ -484,7 +487,27 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 2. Start Broadcast from Blurred Splash Screen
+    // 2. Dynamic Video Zoom Controller
+    function applyZoom(scale) {
+      currentZoom = parseFloat(scale);
+      const playerEl = document.querySelector('#yt-player');
+      if (playerEl) {
+        playerEl.style.transform = `translate(-50%, -50%) scale(${currentZoom})`;
+      }
+      const display = document.getElementById('zoom-val');
+      if (display) {
+        display.innerText = Math.round(currentZoom * 100) + '%';
+      }
+    }
+
+    function changeZoom(delta) {
+      let val = Math.min(1.30, Math.max(1.00, currentZoom + delta));
+      val = Math.round(val * 100) / 100;
+      document.getElementById('zoom-slider').value = val;
+      applyZoom(val);
+    }
+
+    // 3. Start Broadcast from Splash Screen
     function startBroadcast() {
       const splash = document.getElementById('splash-screen');
       splash.style.opacity = '0';
@@ -498,7 +521,7 @@
       }
     }
 
-    // 3. Secret 'A' Key Handler (Fix: e.preventDefault stops 'A' from entering password box)
+    // 4. Secret 'A' Key Handler
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT') return;
       if (e.key === 'a' || e.key === 'A') {
@@ -546,13 +569,12 @@
       document.getElementById('admin-overlay').style.display = 'none';
     }
 
-    // 4. Fixed Playback Controls (e.stopPropagation prevents resume on body click)
+    // 5. Fixed Playback Controls (Pause & Mute)
     function togglePlayPause(e) {
       if (e) e.stopPropagation();
       const btn = document.getElementById('btn-pause-play');
 
       if (!isPaused) {
-        // PAUSE & MUTE
         if (player) {
           try { player.pauseVideo(); } catch (err) {}
           try { player.mute(); } catch (err) {}
@@ -569,7 +591,6 @@
         btn.style.background = '#16a34a';
         btn.style.color = '#fff';
       } else {
-        // RESUME & UNMUTE
         if (player) {
           try { player.unMute(); } catch (err) {}
           try { player.playVideo(); } catch (err) {}
@@ -598,7 +619,7 @@
       playNext();
     }
 
-    // 5. Firebase Sync Engine
+    // 6. Firebase Sync Engine (Saves both Playlist & ZoomScale)
     async function loadFromFirebase() {
       try {
         const res = await fetch(FIREBASE_URL);
@@ -606,6 +627,13 @@
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             playlist = data;
+          } else if (data && typeof data === 'object') {
+            if (data.playlist) playlist = data.playlist;
+            if (data.zoomScale) {
+              currentZoom = parseFloat(data.zoomScale);
+              applyZoom(currentZoom);
+              document.getElementById('zoom-slider').value = currentZoom;
+            }
           }
         }
       } catch (err) {
@@ -618,15 +646,20 @@
       status.style.color = '#38bdf8';
       status.innerText = 'Firebase වෙත Save වෙමින් පවතී...';
 
+      const payload = {
+        playlist: playlist,
+        zoomScale: currentZoom
+      };
+
       try {
         const res = await fetch(FIREBASE_URL, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(playlist)
+          body: JSON.stringify(payload)
         });
         if (res.ok) {
           status.style.color = '#22c55e';
-          status.innerText = '✓ Firebase එකේ සදහටම Save වුණා!';
+          status.innerText = '✓ Playlist එක සහ Zoom Size එක සාර්ථකව Save වුණා!';
           setTimeout(() => { status.innerText = ''; }, 3000);
         } else {
           status.style.color = '#ef4444';
@@ -638,7 +671,7 @@
       }
     }
 
-    // 6. Direct String YouTube Link Extractor
+    // 7. Robust Link Extractor
     function extractID(url) {
       if (!url) return '';
       url = String(url).trim();
@@ -709,7 +742,7 @@
       });
     }
 
-    // 7. YouTube Player Engine
+    // 8. YouTube Player Engine
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -734,7 +767,6 @@
         events: {
           'onReady': (e) => {
             player = e.target;
-            // If in headless runner (automated), auto play
             if (navigator.userAgent.includes('Headless') || window.location.search.includes('autoplay=1')) {
               startBroadcast();
             }

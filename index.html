@@ -19,7 +19,7 @@
       position: relative;
     }
 
-    /* 1. Video Viewport (Scale adjustable from 50% to 150%) */
+    /* 1. Video Viewport */
     .video-viewport {
       position: fixed;
       top: 0;
@@ -39,7 +39,7 @@
       height: 56.25vw;
       min-height: 100vh;
       min-width: 177.78vh;
-      transform: translate(-50%, -50%) scale(0.90); /* Default 90% */
+      transform: translate(-50%, -50%) scale(0.90);
       border: none;
       transition: transform 0.2s ease-out;
     }
@@ -172,7 +172,31 @@
     .highlight-blue { color: #38bdf8; font-weight: 700; }
     .highlight-brand { color: #c084fc; font-weight: 800; }
 
-    /* 5. BLURRED SPLASH OVERLAY */
+    /* =========================================================
+       5. LARGE GLOWING CENTER BEAT VISUALIZER
+       ========================================================= */
+    .center-beat-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 85%;
+      max-width: 950px;
+      height: 180px;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #beat-canvas {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.7)) drop-shadow(0 0 32px rgba(192, 132, 252, 0.4));
+    }
+
+    /* 6. BLURRED SPLASH OVERLAY */
     #splash-screen {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -347,7 +371,7 @@
     <div id="yt-player"></div>
   </div>
 
-  <!-- 2. TV Logo Bug -->
+  <!-- 2. Top Right Logo Bug -->
   <div class="tv-channel-bug">
     <div class="brand-section">
       <span class="brand-viru">VIRU</span>
@@ -359,10 +383,15 @@
     </div>
   </div>
 
-  <!-- 3. TV Clock -->
+  <!-- 3. LARGE GLOWING CENTER BEAT BAR -->
+  <div class="center-beat-container">
+    <canvas id="beat-canvas" width="950" height="180"></canvas>
+  </div>
+
+  <!-- 4. TV Clock -->
   <div class="tv-clock" id="clock">00:00:00 PM</div>
 
-  <!-- 4. Bottom Broadcast Bar -->
+  <!-- 5. Bottom Broadcast Bar -->
   <div class="ticker-container">
     <div class="on-air-badge">
       <span class="live-dot"></span>
@@ -378,7 +407,7 @@
     </div>
   </div>
 
-  <!-- 5. Blurred Splash Screen -->
+  <!-- 6. Blurred Splash Screen -->
   <div id="splash-screen" onclick="startBroadcast()">
     <div class="splash-box">
       <div class="splash-title">VIRU RADIO</div>
@@ -420,7 +449,7 @@
         </div>
       </div>
 
-      <!-- VIDEO ZOOM ADJUSTER (Supports 50% to 150%) -->
+      <!-- VIDEO ZOOM ADJUSTER (50% to 150%) -->
       <div class="control-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 11px; font-weight: 800; color: #38bdf8; letter-spacing: 1px;">VIDEO SCREEN ZOOM (FIT SIZE)</span>
@@ -471,7 +500,7 @@
     let player = null;
     let isPaused = false;
     let hasStarted = false;
-    let currentZoom = 0.90; // Default 90% (Can go down to 50%)
+    let currentZoom = 0.90;
 
     // 1. Clock (Asia/Colombo SLST)
     function updateClock() {
@@ -487,7 +516,7 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 2. Dynamic Video Zoom Controller (50% to 150%)
+    // 2. Video Zoom Adjuster
     function applyZoom(scale) {
       currentZoom = parseFloat(scale);
       const playerEl = document.querySelector('#yt-player');
@@ -569,7 +598,7 @@
       document.getElementById('admin-overlay').style.display = 'none';
     }
 
-    // 5. Fixed Playback Controls
+    // 5. Playback Controls (Pause & Mute)
     function togglePlayPause(e) {
       if (e) e.stopPropagation();
       const btn = document.getElementById('btn-pause-play');
@@ -619,7 +648,7 @@
       playNext();
     }
 
-    // 6. Firebase Sync Engine (Loads/Saves ZoomScale & Playlist)
+    // 6. Firebase Sync Engine
     async function loadFromFirebase() {
       try {
         const res = await fetch(FIREBASE_URL);
@@ -799,6 +828,75 @@
         document.getElementById('now-playing-title').innerText = `${cur.title} • ${cur.artist}`;
       }
     }
+
+    // =========================================================
+    // 9. HIGH-ENERGY DYNAMIC BEAT BAR (Center Spectrum Visualizer)
+    // =========================================================
+    const beatCanvas = document.getElementById('beat-canvas');
+    const bCtx = beatCanvas.getContext('2d');
+    const TOTAL_BARS = 64;
+    let beatPhase = 0;
+
+    function renderBeatVisualizer() {
+      requestAnimationFrame(renderBeatVisualizer);
+      bCtx.clearRect(0, 0, beatCanvas.width, beatCanvas.height);
+
+      const width = beatCanvas.width;
+      const height = beatCanvas.height;
+      const centerY = height / 2;
+      const barWidth = (width / TOTAL_BARS) * 0.75;
+      const spacing = (width / TOTAL_BARS) * 0.25;
+
+      // When playing, speed up beat animation; when paused, slow idle
+      beatPhase += isPaused ? 0.02 : 0.14;
+
+      // Dynamic Beat kick simulation
+      const kick = isPaused ? 0.1 : (Math.sin(beatPhase * 2.2) * 0.5 + 0.5);
+      const subKick = isPaused ? 0.05 : (Math.cos(beatPhase * 1.3) * 0.5 + 0.5);
+
+      for (let i = 0; i < TOTAL_BARS; i++) {
+        // Center-symmetrical EQ pattern
+        const distFromCenter = Math.abs(i - TOTAL_BARS / 2) / (TOTAL_BARS / 2);
+        const centerFactor = 1.0 - Math.pow(distFromCenter, 1.4);
+
+        // Harmonic waveform calculation for high-energy rhythm
+        const wave1 = Math.sin(beatPhase + i * 0.28);
+        const wave2 = Math.cos(beatPhase * 1.5 + i * 0.45);
+        const wave3 = Math.sin(beatPhase * 3.1 + i * 0.15);
+
+        let energy = (Math.abs(wave1 * 0.5 + wave2 * 0.3 + wave3 * 0.2));
+        energy = energy * (0.6 + kick * 0.8 + subKick * 0.4) * centerFactor;
+
+        // Base height when idle vs full height when music plays
+        const barHeight = isPaused ? (3 + centerFactor * 8) : Math.max(4, energy * (height * 0.46));
+
+        const x = i * (barWidth + spacing) + spacing / 2;
+
+        // Neon Gradient: Cyan to Violet to Hot Pink
+        const grad = bCtx.createLinearGradient(0, centerY - barHeight, 0, centerY + barHeight);
+        grad.addColorStop(0, '#38bdf8');
+        grad.addColorStop(0.5, '#c084fc');
+        grad.addColorStop(1, '#f43f5e');
+
+        bCtx.fillStyle = grad;
+
+        // Draw symmetrical dual-sided bars from center baseline
+        bCtx.beginPath();
+        bCtx.roundRect(x, centerY - barHeight, barWidth, barHeight * 2,);
+        bCtx.fill();
+
+        // Glowing Floating Peak Dots
+        if (!isPaused && barHeight > 12) {
+          bCtx.fillStyle = '#ffffff';
+          bCtx.shadowColor = '#38bdf8';
+          bCtx.shadowBlur = 6;
+          bCtx.fillRect(x, centerY - barHeight - 4, barWidth, 2);
+          bCtx.fillRect(x, centerY + barHeight + 2, barWidth, 2);
+          bCtx.shadowBlur = 0; // reset
+        }
+      }
+    }
+    renderBeatVisualizer();
   </script>
 </body>
 </html>
